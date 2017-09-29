@@ -1,7 +1,9 @@
-FROM arm32v7/debian:jessie
+FROM arm32v7/debian:latest
 
 ENV EPICS_BASE=/usr/local/epics/base \
-    PATH=$PATH:/usr/local/epics/base/bin/linux-arm:/usr/local/epics/extensions/bin/linux-arm
+    PATH=$PATH:/usr/local/epics/base/bin/linux-arm:/usr/local/epics/extensions/bin/linux-arm \
+    LD_LIBRARY_PATH=/usr/local/epics/base/lib/linux-arm \
+    PYEPICS_LIBCA=/usr/local/epics/base/lib/linux-arm/libca.so
 
 RUN apt-get update \
     && apt-get install -y \
@@ -16,6 +18,7 @@ RUN apt-get update \
 	perl \
 	python-setuptools \
 	re2c \
+	supervisor \
     && apt-get clean	
 
 RUN cd /usr/local/share/ca-certificates \
@@ -52,5 +55,8 @@ RUN cd /usr/local/epics/support \
 
 # PyEpics
 RUN easy_install -U PyEpics
+RUN ln -s $EPICS_BASE/linux-arm/libca.so /usr/local/lib/python*/dist-packages/ \
+    && ln -s $EPICS_BASE/lib/linux-arm/libCom.so /usr/local/lib/python*/dist-packages/
 
 COPY configure/.epicsrc /usr/local/epics
+
